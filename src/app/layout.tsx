@@ -8,14 +8,24 @@ import "./globals.css";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { env } from "@/env";
 import { getSettings } from "@/server/queries/settings";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(env.SITE_URL),
   title: {
     default: "Wind",
     template: "%s - Wind",
   },
   description: "简洁、轻盈、流动的个人博客。",
+  alternates: {
+    types: { "application/rss+xml": "/feed.xml" },
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Wind",
+    locale: "zh_CN",
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

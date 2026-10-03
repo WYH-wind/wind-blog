@@ -4,10 +4,10 @@
 
 ## 字体
 
-| 字体 | 用途 | 许可证 | 商用 | 留档 |
-| --- | --- | --- | --- | --- |
+| 字体                                       | 用途                          | 许可证                    | 商用                    | 留档                                                                            |
+| ------------------------------------------ | ----------------------------- | ------------------------- | ----------------------- | ------------------------------------------------------------------------------- |
 | 霞鹜文楷 Screen（LXGW WenKai Screen）1.7.0 | 标题字体（自托管 woff2 子集） | SIL Open Font License 1.1 | ✅ 允许商用/嵌入/自托管 | [docs/licenses/LXGW-WenKai-Screen-OFL.txt](licenses/LXGW-WenKai-Screen-OFL.txt) |
-| JetBrains Mono 5.3.0（@fontsource） | 代码/日期等宽字体（自托管） | SIL Open Font License 1.1 | ✅ 允许商用/嵌入/自托管 | [docs/licenses/JetBrains-Mono-OFL.txt](licenses/JetBrains-Mono-OFL.txt) |
+| JetBrains Mono 5.3.0（@fontsource）        | 代码/日期等宽字体（自托管）   | SIL Open Font License 1.1 | ✅ 允许商用/嵌入/自托管 | [docs/licenses/JetBrains-Mono-OFL.txt](licenses/JetBrains-Mono-OFL.txt)         |
 
 说明：
 

@@ -43,3 +43,57 @@ export async function getPostNeighbors(publishedAt: Date) {
   ]);
   return { prev, next };
 }
+
+// ============ Phase 3：标签 / 归档 / 搜索 ============
+
+export async function listTagsWithCount() {
+  return db.tag.findMany({
+    include: { _count: { select: { posts: true } } },
+    orderBy: { posts: { _count: "desc" } },
+  });
+}
+
+export async function getTagBySlug(slug: string) {
+  return db.tag.findUnique({ where: { slug } });
+}
+
+export async function listPublishedPostsByTag(tagId: number) {
+  return db.post.findMany({
+    where: { status: "PUBLISHED", tags: { some: { tagId } } },
+    orderBy: [{ pinned: "desc" }, { pinOrder: "asc" }, { publishedAt: "desc" }],
+    include: POST_TAGS_INCLUDE,
+  });
+}
+
+export async function listArchivedPosts() {
+  return db.post.findMany({
+    where: { status: "PUBLISHED" },
+    orderBy: { publishedAt: "desc" },
+    select: { id: true, slug: true, title: true, publishedAt: true },
+  });
+}
+
+export type SearchHit = {
+  id: number;
+  slug: string;
+  title: string;
+  summary: string;
+  publishedAt: Date | null;
+};
+
+/**
+ * 全文搜索：pg_trgm + ILIKE（中文子串匹配；q 已在调用侧校验长度）。
+ * LIKE 通配符（% _ \）必须转义，防止用户输入改变匹配语义。
+ */
+export async function searchPublishedPosts(q: string): Promise<SearchHit[]> {
+  const escaped = q.replace(/[\\%_]/g, (m) => `\\${m}`);
+  const pattern = `%${escaped}%`;
+  return db.$queryRaw<SearchHit[]>`
+    SELECT p.id, p.slug, p.title, p.summary, p."publishedAt"
+    FROM "Post" p
+    WHERE p.status = 'PUBLISHED'
+      AND (p.title ILIKE ${pattern} ESCAPE '\\' OR p.summary ILIKE ${pattern} ESCAPE '\\')
+    ORDER BY p."publishedAt" DESC NULLS LAST
+    LIMIT 20
+  `;
+}

@@ -39,6 +39,9 @@ model Post {
 
   @@index([status, publishedAt])
   @@index([status, pinned, pinOrder, publishedAt])
+  // 中文子串搜索：pg_trgm GIN 索引（仅 title/summary；content 观察 EXPLAIN 后再加）
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([summary(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 enum ReactionKind {
