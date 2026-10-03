@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
+import { PostReactions } from "@/components/post-reactions";
 import { formatDate } from "@/lib/date";
 import { renderMarkdown } from "@/lib/markdown";
 import { getPostNeighbors, getPublishedPostBySlug } from "@/server/queries/posts";
@@ -69,6 +70,8 @@ export default async function PostPage({ params }: PostPageProps) {
         className="prose prose-zinc max-w-none dark:prose-invert"
         dangerouslySetInnerHTML={{ __html: html }}
       />
+
+      <PostReactions slug={post.slug} initialViews={post.views} />
 
       <nav className="flex justify-between gap-4 border-t border-zinc-200 pt-6 text-sm dark:border-zinc-700">
         {prev ? (

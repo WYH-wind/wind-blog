@@ -97,3 +97,11 @@ export async function searchPublishedPosts(q: string): Promise<SearchHit[]> {
     LIMIT 20
   `;
 }
+
+/** 轻量查询：仅取 id（API 路由用） */
+export async function getPublishedPostIdBySlug(slug: string) {
+  return db.post.findFirst({
+    where: { slug, status: "PUBLISHED" },
+    select: { id: true },
+  });
+}
