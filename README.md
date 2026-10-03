@@ -34,7 +34,7 @@ pnpm build && pnpm start      # 生产模式运行（后台登录才可用）
 pnpm admin:hash-password <你的密码>   # 输出可直接粘贴进 .env 的行（$ 已按 @next/env 规则转义）
 ```
 
-把输出的 `ADMIN_PASSWORD_HASH="..."` 写入 `.env` 后重启服务。**本地开发密码**为 `wind-dev-2026`（仅存于本地 .env，不入库）；上线前务必重新生成。
+把输出的 `ADMIN_PASSWORD_HASH="..."` 写入 `.env` 后重启服务。本地开发密码存于本地 `.env`（不入库）；**上线前务必重新生成并更换**。
 
 ## 常用脚本
 
