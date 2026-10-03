@@ -1,11 +1,7 @@
 import "server-only";
 
 import { db } from "@/server/db";
-import {
-  SETTING_DEFAULTS,
-  SETTING_KEYS,
-  type SettingKey,
-} from "@/lib/settings-schema";
+import { SETTING_DEFAULTS, SETTING_KEYS, type SettingKey } from "@/lib/settings-schema";
 
 export type SiteSettings = Record<SettingKey, string>;
 

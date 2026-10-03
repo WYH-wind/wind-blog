@@ -15,7 +15,10 @@ export default async function AdminLinksPage() {
     <div className="space-y-8">
       <h1 className="font-heading text-2xl tracking-wide">友链管理</h1>
 
-      <form action={createFriendLinkAction} className="grid gap-3 rounded-xl border border-line bg-surface p-4 sm:grid-cols-2">
+      <form
+        action={createFriendLinkAction}
+        className="grid gap-3 rounded-xl border border-line bg-surface p-4 sm:grid-cols-2"
+      >
         <input name="name" placeholder="名称" required aria-label="名称" className={field} />
         <input
           name="url"

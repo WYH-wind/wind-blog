@@ -9,7 +9,31 @@ import remarkRehype from "remark-rehype";
 import rehypeStringify from "rehype-stringify";
 import { unified } from "unified";
 import type { BuiltinLanguage, BuiltinTheme } from "shiki";
+import type { Element, Root } from "hast";
+import type { Plugin } from "unified";
 import type { Heading, RootContent } from "mdast";
+
+// URL scheme 白名单：有协议的 URL 必须命中；相对路径/锚点直接放行
+const SAFE_URL_SCHEME = /^(https?:|mailto:|\/|#)/i;
+const HAS_SCHEME = /^[a-zA-Z][a-zA-Z0-9+.-]*:/;
+const URL_ATTRS = ["href", "src", "poster", "cite"] as const;
+
+/** 拦截 javascript: / vbscript: / data: 等危险协议（remark 默认不处理） */
+const rehypeSafeUrls: Plugin<[], Root> = () => (tree) => {
+  const walk = (node: unknown) => {
+    const el = node as Element;
+    if (el.properties) {
+      for (const attr of URL_ATTRS) {
+        const value = el.properties[attr];
+        if (typeof value === "string" && HAS_SCHEME.test(value) && !SAFE_URL_SCHEME.test(value)) {
+          el.properties[attr] = "";
+        }
+      }
+    }
+    for (const child of el.children ?? []) walk(child);
+  };
+  walk(tree);
+};
 
 // 常用语言预加载；未知语言回落 plaintext（fallbackLanguage）
 const SHIKI_LANGS: BuiltinLanguage[] = [
@@ -44,6 +68,7 @@ const processor = unified()
   .use(remarkGfm)
   .use(remarkRehype)
   .use(rehypeSlug)
+  .use(rehypeSafeUrls)
   .use(rehypeShiki, {
     themes: { light: "one-light", dark: "one-dark-pro" } as {
       light: BuiltinTheme;

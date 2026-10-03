@@ -22,7 +22,10 @@ export function slugFromTitle(title: string): string {
     .map((s) => s.replace(/[^a-z0-9-]/g, ""))
     .filter(Boolean);
 
-  const cleaned = parts.join("-").replace(/-+/g, "-").replace(/^-+|-+$/g, "");
+  const cleaned = parts
+    .join("-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
   if (cleaned) return cleaned.slice(0, 80);
   return `post-${randomSuffix()}`;
 }

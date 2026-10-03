@@ -99,7 +99,10 @@ export function PostEditor({ initial }: { initial: PostEditorInitial | null }) {
         status,
         pinned,
         pinOrder,
-        tags: tagsText.split(/[,，]/).map((t) => t.trim()).filter(Boolean),
+        tags: tagsText
+          .split(/[,，]/)
+          .map((t) => t.trim())
+          .filter(Boolean),
       });
       if (!result.ok) {
         setMessage({ ok: false, text: result.error });
@@ -120,9 +123,7 @@ export function PostEditor({ initial }: { initial: PostEditorInitial | null }) {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-heading text-2xl tracking-wide">
-          {initial ? "编辑文章" : "新建文章"}
-        </h1>
+        <h1 className="font-heading text-2xl tracking-wide">{initial ? "编辑文章" : "新建文章"}</h1>
         <div className="flex items-center gap-3">
           {message && (
             <span className={`text-sm ${message.ok ? "text-accent" : "text-red-500"}`}>

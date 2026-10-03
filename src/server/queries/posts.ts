@@ -1,5 +1,6 @@
 import "server-only";
 
+import { escapeLikePattern } from "@/lib/search";
 import { db } from "@/server/db";
 
 const POST_TAGS_INCLUDE = { tags: { include: { tag: true } } } as const;
@@ -86,8 +87,7 @@ export type SearchHit = {
  * LIKE 通配符（% _ \）必须转义，防止用户输入改变匹配语义。
  */
 export async function searchPublishedPosts(q: string): Promise<SearchHit[]> {
-  const escaped = q.replace(/[\\%_]/g, (m) => `\\${m}`);
-  const pattern = `%${escaped}%`;
+  const pattern = `%${escapeLikePattern(q)}%`;
   return db.$queryRaw<SearchHit[]>`
     SELECT p.id, p.slug, p.title, p.summary, p."publishedAt"
     FROM "Post" p

@@ -10,10 +10,7 @@ import { rateLimit } from "@/server/rate-limit";
 
 export type LoginState = { error?: string };
 
-export async function loginAction(
-  _prevState: LoginState,
-  formData: FormData,
-): Promise<LoginState> {
+export async function loginAction(_prevState: LoginState, formData: FormData): Promise<LoginState> {
   const password = String(formData.get("password") ?? "");
   if (!password) {
     return { error: "请输入密码" };

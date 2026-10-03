@@ -59,8 +59,8 @@ export async function savePostAction(
   let publishedAt: Date | null = null;
   if (input.status === "PUBLISHED") {
     const existing = id
-      ? (await db.post.findUnique({ where: { id }, select: { publishedAt: true } }))
-          ?.publishedAt ?? null
+      ? ((await db.post.findUnique({ where: { id }, select: { publishedAt: true } }))
+          ?.publishedAt ?? null)
       : null;
     publishedAt = existing && existing <= now ? existing : now;
   }
