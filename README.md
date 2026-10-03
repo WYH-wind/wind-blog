@@ -54,5 +54,6 @@ pnpm admin:hash-password <你的密码>   # 输出可直接粘贴进 .env 的行
 ## 文档
 
 - 开发计划、技术基线、安全标准、部署方案：[docs/PLAN.md](docs/PLAN.md)
+- 迭代二需求（i18n / 探索页 / 动效 / 自适应）：[docs/ITERATION-2.md](docs/ITERATION-2.md)
 - 字体与配色授权：[docs/FONTS.md](docs/FONTS.md)
 - 生产部署（Phase 7，待阿里云 ECS 就绪后启动）：方案见 docs/PLAN.md 第五节
