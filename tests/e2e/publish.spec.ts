@@ -5,7 +5,7 @@ import { loginAsAdmin, logout } from "./helpers";
 const TITLE = "E2E 发布链路验证";
 const SLUG_PREFIX = "e2e-publish-check";
 
-test.describe("发布链路（登录 → 新建 → 发布 → 前台可见 → 删除）", () => {
+test.describe("发布链路（登录 → 新建 → 草稿 → 发布跳转 → 删除）", () => {
   test("完整走一遍后台写作发布", async ({ page }) => {
     await loginAsAdmin(page);
 
@@ -30,13 +30,21 @@ test.describe("发布链路（登录 → 新建 → 发布 → 前台可见 → 
     await page
       .getByRole("textbox", { name: "正文" })
       .fill("## E2E 标题\n\n一段含 `行内代码` 的正文。\n\n```ts\nconst e2e = true;\n```");
-    await page.getByRole("textbox", { name: "标签" }).fill("测试");
 
-    // 发布
-    await page.getByRole("combobox", { name: "状态" }).selectOption("PUBLISHED");
-    await page.getByRole("button", { name: "保存" }).click();
-    // 新建后跳转到编辑页
+    // 标签选择器：输入新标签回车添加
+    const tagInput = page.getByRole("textbox", { name: "新标签" });
+    await tagInput.fill("测试");
+    await tagInput.press("Enter");
+    await expect(page.getByRole("button", { name: "移除标签 测试" })).toBeVisible();
+
+    // 先存草稿：跳到编辑页
+    await page.getByRole("button", { name: "保存草稿" }).click();
     await expect(page).toHaveURL(/\/admin\/posts\/\d+\/edit$/, { timeout: 10_000 });
+
+    // 发布：二次确认后跳到前台文章页
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: "发布" }).click();
+    await expect(page).toHaveURL(new RegExp(`/posts/${SLUG_PREFIX}$`), { timeout: 10_000 });
 
     // 前台列表出现
     await page.goto("/");

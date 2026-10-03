@@ -12,7 +12,7 @@ export default async function AdminLinksPage() {
   const links = await listAllFriendLinks();
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-3xl space-y-8">
       <h1 className="font-heading text-2xl tracking-wide">友链管理</h1>
 
       <form

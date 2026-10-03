@@ -15,7 +15,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const hits = q ? await searchPublishedPosts(q) : [];
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-2xl space-y-8">
       <h1 className="font-heading text-3xl tracking-wide">搜索</h1>
 
       <form action="/search" method="GET" className="flex gap-2">

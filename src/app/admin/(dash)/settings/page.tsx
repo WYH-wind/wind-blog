@@ -8,7 +8,7 @@ export default async function AdminSettingsPage() {
   const settings = await getSettings();
 
   return (
-    <div className="max-w-xl space-y-6">
+    <div className="mx-auto max-w-xl space-y-6">
       <h1 className="font-heading text-2xl tracking-wide">站点设置</h1>
 
       <form action={saveSettingsFormAction} className="space-y-4">

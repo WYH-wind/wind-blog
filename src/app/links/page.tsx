@@ -9,7 +9,7 @@ export default async function LinksPage() {
   const links = await listVisibleFriendLinks();
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-2xl space-y-8">
       <h1 className="font-heading text-3xl tracking-wide">友链</h1>
       {links.length === 0 ? (
         <p className="text-muted">还没有友链，风还在路上。</p>

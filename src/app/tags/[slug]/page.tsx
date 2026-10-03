@@ -22,7 +22,7 @@ export default async function TagPage({ params }: TagPageProps) {
   const posts = await listPublishedPostsByTag(tag.id);
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-2xl space-y-8">
       <h1 className="font-heading text-3xl tracking-wide">
         标签：<span className="text-accent">{tag.name}</span>
       </h1>

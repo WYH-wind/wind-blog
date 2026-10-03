@@ -27,7 +27,7 @@ export default async function ArchivesPage() {
   const years = [...byYear.keys()].sort((a, b) => b - a);
 
   return (
-    <div className="space-y-10">
+    <div className="mx-auto w-full max-w-2xl space-y-10">
       <h1 className="font-heading text-3xl tracking-wide">
         归档 <span className="ml-1 font-mono text-base text-muted">{posts.length}</span>
       </h1>

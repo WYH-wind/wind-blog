@@ -8,7 +8,7 @@ export default async function AdminDashboard() {
   const posts = await listAllPosts();
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl tracking-wide">文章管理</h1>
         <Link

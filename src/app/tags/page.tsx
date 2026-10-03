@@ -10,7 +10,7 @@ export default async function TagsPage() {
   const tags = await listTagsWithCount();
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-2xl space-y-8">
       <h1 className="font-heading text-3xl tracking-wide">标签</h1>
       {tags.length === 0 ? (
         <p className="text-muted">还没有任何标签。</p>

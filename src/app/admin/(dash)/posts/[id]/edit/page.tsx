@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { PostEditor } from "@/components/admin/post-editor";
-import { getPostById } from "@/server/queries/admin";
+import { listAllTags, getPostById } from "@/server/queries/admin";
 
 type EditPostPageProps = { params: Promise<{ id: string }> };
 
@@ -10,11 +10,12 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
   const numericId = Number(id);
   if (!Number.isInteger(numericId)) notFound();
 
-  const post = await getPostById(numericId);
+  const [post, allTags] = await Promise.all([getPostById(numericId), listAllTags()]);
   if (!post) notFound();
 
   return (
     <PostEditor
+      allTags={allTags}
       initial={{
         id: post.id,
         title: post.title,

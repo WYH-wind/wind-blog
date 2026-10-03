@@ -11,7 +11,7 @@ export default async function AboutPage() {
   const { html } = await renderMarkdown(settings["site.about"]);
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-2xl space-y-8">
       <h1 className="font-heading text-3xl tracking-wide">关于</h1>
       <div
         className="prose prose-zinc max-w-none dark:prose-invert"

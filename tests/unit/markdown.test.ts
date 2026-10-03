@@ -41,6 +41,31 @@ describe("renderMarkdown", () => {
     const { html } = await renderMarkdown("| a | b |\n| - | - |\n| 1 | 2 |");
     expect(html).toContain("<table>");
   });
+
+  it("变色/高亮指令渲染为白名单标签", async () => {
+    const { html } = await renderMarkdown(":red[危险] 与 :mark[重点] 与 :blue[链接感]");
+    expect(html).toContain('<span class="wind-c-red">危险</span>');
+    expect(html).toContain("<mark>重点</mark>");
+    expect(html).toContain('<span class="wind-c-blue">链接感</span>');
+  });
+
+  it("白名单外的指令整体丢弃，不产生标签", async () => {
+    const { html } = await renderMarkdown(
+      "前 :javascript[alert(1)] 后\n\n:::evil\n隐藏内容\n:::",
+    );
+    expect(html).not.toContain("alert(1)");
+    expect(html).not.toContain("隐藏内容");
+    expect(html).not.toContain("<javascript");
+    // 未知指令不能落成默认的 <div> 包裹
+    expect(html).not.toContain("<div");
+  });
+
+  it("指令属性不透传（防 XSS）", async () => {
+    const { html } = await renderMarkdown(':red[文字]{onclick="alert(1)"}');
+    expect(html).toContain("wind-c-red");
+    expect(html).not.toContain("onclick");
+    expect(html).not.toContain("alert");
+  });
 });
 
 describe("阅读时长", () => {

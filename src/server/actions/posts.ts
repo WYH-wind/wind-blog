@@ -8,7 +8,9 @@ import { requireAdmin } from "@/server/auth/require-admin";
 import { db } from "@/server/db";
 import { HttpError } from "@/server/http";
 
-export type SavePostResult = { ok: true; id: number } | { ok: false; error: string };
+export type SavePostResult =
+  | { ok: true; id: number; slug: string }
+  | { ok: false; error: string };
 
 async function uniqueSlug(base: string, excludeId?: number): Promise<string> {
   let slug = base;
@@ -81,10 +83,10 @@ export async function savePostAction(
           publishedAt,
           tags: { create: (await resolveTagIds(input.tags)).map((tagId) => ({ tagId })) },
         },
-        select: { id: true },
+        select: { id: true, slug: true },
       });
       revalidatePath("/", "layout");
-      return { ok: true, id: post.id };
+      return { ok: true, id: post.id, slug: post.slug };
     }
 
     const prev = await db.post.findUnique({
@@ -124,7 +126,7 @@ export async function savePostAction(
     }
 
     revalidatePath("/", "layout");
-    return { ok: true, id };
+    return { ok: true, id, slug };
   } catch (e) {
     if (e instanceof HttpError) return { ok: false, error: e.message };
     return { ok: false, error: "保存失败，请重试" };

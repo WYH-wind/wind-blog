@@ -16,16 +16,16 @@ export function SiteHeader({ siteName }: { siteName: string }) {
       <div className="mx-auto flex h-14 w-full max-w-2xl items-center justify-between px-6">
         <Link
           href="/"
-          className="font-heading text-xl tracking-wide text-foreground transition-colors hover:text-accent"
+          className="shrink-0 font-heading text-xl tracking-wide text-foreground transition-colors hover:text-accent"
         >
           {siteName}
         </Link>
-        <nav className="flex items-center gap-1 text-sm">
+        <nav className="flex flex-nowrap items-center gap-0.5 overflow-x-auto text-[13px] [scrollbar-width:none] sm:gap-1 sm:text-sm [&::-webkit-scrollbar]:hidden">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-full px-2.5 py-1 text-muted transition-colors hover:text-accent"
+              className="shrink-0 whitespace-nowrap rounded-full px-2 py-1 text-muted transition-colors hover:text-accent sm:px-2.5"
             >
               {item.label}
             </Link>
@@ -34,7 +34,7 @@ export function SiteHeader({ siteName }: { siteName: string }) {
             href="/search"
             aria-label="搜索"
             title="搜索"
-            className="rounded-full p-2 text-muted transition-colors hover:bg-accent-soft hover:text-accent"
+            className="shrink-0 rounded-full p-2 text-muted transition-colors hover:bg-accent-soft hover:text-accent"
           >
             <svg
               viewBox="0 0 24 24"

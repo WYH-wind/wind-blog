@@ -9,7 +9,7 @@ export default async function Home() {
   const [posts, settings] = await Promise.all([listPublishedPosts(20), getSettings()]);
 
   return (
-    <div className="space-y-12">
+    <div className="mx-auto w-full max-w-2xl space-y-12">
       <section className="relative pb-4 pt-8">
         <WindLines className="pointer-events-none absolute inset-x-0 -top-4 w-full opacity-80" />
         <div className="relative">

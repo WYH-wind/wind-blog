@@ -25,3 +25,8 @@ export async function getPostById(id: number) {
     include: { tags: { include: { tag: true } } },
   });
 }
+
+/** 标签选择器数据源：全部现有标签（按名称排序） */
+export async function listAllTags() {
+  return db.tag.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } });
+}

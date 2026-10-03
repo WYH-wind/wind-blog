@@ -3,15 +3,17 @@ import "server-only";
 import GithubSlugger from "github-slugger";
 import rehypeShiki from "@shikijs/rehype";
 import rehypeSlug from "rehype-slug";
+import remarkDirective from "remark-directive";
 import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import rehypeStringify from "rehype-stringify";
 import { unified } from "unified";
+import { SKIP, visit } from "unist-util-visit";
 import type { BuiltinLanguage, BuiltinTheme } from "shiki";
-import type { Element, Root } from "hast";
+import type { Element, Root as HastRoot } from "hast";
+import type { Heading, Root, RootContent } from "mdast";
 import type { Plugin } from "unified";
-import type { Heading, RootContent } from "mdast";
 
 // URL scheme 白名单：有协议的 URL 必须命中；相对路径/锚点直接放行
 const SAFE_URL_SCHEME = /^(https?:|mailto:|\/|#)/i;
@@ -19,7 +21,7 @@ const HAS_SCHEME = /^[a-zA-Z][a-zA-Z0-9+.-]*:/;
 const URL_ATTRS = ["href", "src", "poster", "cite"] as const;
 
 /** 拦截 javascript: / vbscript: / data: 等危险协议（remark 默认不处理） */
-const rehypeSafeUrls: Plugin<[], Root> = () => (tree) => {
+const rehypeSafeUrls: Plugin<[], HastRoot> = () => (tree) => {
   const walk = (node: unknown) => {
     const el = node as Element;
     if (el.properties) {
@@ -33,6 +35,45 @@ const rehypeSafeUrls: Plugin<[], Root> = () => (tree) => {
     for (const child of el.children ?? []) walk(child);
   };
   walk(tree);
+};
+
+// 文中变色/高亮指令白名单：`:mark[文字]`、`:red[文字]` 等。
+// 只映射固定标签与 class，指令属性一律不透传（无 raw HTML，防 XSS 的另一道门）
+const WIND_TEXT_DIRECTIVES: ReadonlyMap<string, { tag: "mark" | "span"; className?: string }> =
+  new Map([
+    ["mark", { tag: "mark" }],
+    ["red", { tag: "span", className: "wind-c-red" }],
+    ["orange", { tag: "span", className: "wind-c-orange" }],
+    ["green", { tag: "span", className: "wind-c-green" }],
+    ["blue", { tag: "span", className: "wind-c-blue" }],
+    ["violet", { tag: "span", className: "wind-c-violet" }],
+  ]);
+
+const remarkWindDirectives: Plugin<[], Root> = () => (tree) => {
+  visit(tree, (node, index, parent) => {
+    if (
+      node.type !== "textDirective" &&
+      node.type !== "leafDirective" &&
+      node.type !== "containerDirective"
+    ) {
+      return;
+    }
+    if (node.type === "textDirective") {
+      const conf = WIND_TEXT_DIRECTIVES.get(node.name);
+      if (conf) {
+        const data = (node.data ??= {}) as Record<string, unknown>;
+        data.hName = conf.tag;
+        if (conf.className) data.hProperties = { className: [conf.className] };
+        return;
+      }
+    }
+    // 白名单外（未知名称、容器/叶指令）：mdast-util-to-hast 会把未知节点包成 <div>，
+    // 必须整块移除，保证指令语法只产出白名单标签
+    if (parent && typeof index === "number") {
+      parent.children.splice(index, 1);
+      return [SKIP, index];
+    }
+  });
 };
 
 // 常用语言预加载；未知语言回落 plaintext（fallbackLanguage）
@@ -66,6 +107,8 @@ const processor = unified()
   .use(remarkParse)
   // 默认不开启 allowDangerousHtml：raw HTML 一律被转义/丢弃（防 XSS 的根基）
   .use(remarkGfm)
+  .use(remarkDirective)
+  .use(remarkWindDirectives)
   .use(remarkRehype)
   .use(rehypeSlug)
   .use(rehypeSafeUrls)

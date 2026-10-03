@@ -41,7 +41,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           disableTransitionOnChange
         >
           <SiteHeader siteName={settings["site.name"]} />
-          <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">{children}</main>
+          {/* 宽度由各页面自定：前台 max-w-2xl、文章页 max-w-4xl、后台 max-w-6xl */}
+          <main className="w-full flex-1 px-6 py-10">{children}</main>
           <SiteFooter siteName={settings["site.name"]} footerText={settings["site.footer"]} />
         </ThemeProvider>
       </body>

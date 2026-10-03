@@ -38,6 +38,50 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
+/* 文中变色指令（:red[] 等）：双主题各自保对比度 */
+:root {
+  --wind-c-red: #b94040;
+  --wind-c-orange: #b45309;
+  --wind-c-green: #047857;
+  --wind-c-blue: #1d4ed8;
+  --wind-c-violet: #6d28d9;
+}
+
+.dark {
+  --wind-c-red: #f87171;
+  --wind-c-orange: #fbbf24;
+  --wind-c-green: #34d399;
+  --wind-c-blue: #93c5fd;
+  --wind-c-violet: #c4b5fd;
+}
+
+.wind-c-red {
+  color: var(--wind-c-red);
+}
+.wind-c-orange {
+  color: var(--wind-c-orange);
+}
+.wind-c-green {
+  color: var(--wind-c-green);
+}
+.wind-c-blue {
+  color: var(--wind-c-blue);
+}
+.wind-c-violet {
+  color: var(--wind-c-violet);
+}
+
+/* 锚点跳转：平滑滚动 + 预留 sticky 头部高度（尊重 reduced-motion） */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -144,4 +188,16 @@ pre.shiki {
 .prose :not(pre) > code::before,
 .prose :not(pre) > code::after {
   content: none;
+}
+
+.prose mark {
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 0.1em 0.35em;
+  border-radius: 0.375rem;
+}
+
+/* 目录锚点落点：避开 sticky 头部（h-14） */
+.prose :is(h1, h2, h3, h4) {
+  scroll-margin-top: 5.5rem;
 }

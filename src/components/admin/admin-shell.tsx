@@ -10,7 +10,7 @@ const ADMIN_NAV = [
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-6xl space-y-8">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line/70 pb-4">
         <nav className="flex items-center gap-1 text-sm">
           {ADMIN_NAV.map((item) => (
