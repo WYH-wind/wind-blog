@@ -8,8 +8,10 @@ async function main() {
   }
   // @node-rs/argon2 默认参数即 OWASP 推荐的 Argon2id
   const digest = await hash(password);
-  console.log("已生成 ADMIN_PASSWORD_HASH，请写入 .env：");
-  console.log(`ADMIN_PASSWORD_HASH="${digest}"`);
+  // .env 由 @next/env 加载，会对值做 $变量 展开，必须转义
+  const escaped = digest.replaceAll("$", "\\$");
+  console.log("已生成 Argon2id 哈希。下面是可直接粘贴进 .env 的行：");
+  console.log(`ADMIN_PASSWORD_HASH="${escaped}"`);
 }
 
 main().catch((e) => {

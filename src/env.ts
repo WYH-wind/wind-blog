@@ -10,6 +10,8 @@ const envSchema = z.object({
   DATABASE_URL: z.string().startsWith("postgresql://"),
   SESSION_SECRET: z.string().min(32),
   SITE_URL: z.string().url().default("http://localhost:3000"),
+  // 上传图片的本地存储目录（生产环境为挂载卷）
+  UPLOAD_DIR: z.string().default("./uploads"),
   // Phase 5 后台启用；缺失时仅前台功能可用
   ADMIN_PASSWORD_HASH: z.string().optional(),
 });

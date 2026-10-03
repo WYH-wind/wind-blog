@@ -105,3 +105,13 @@ export async function getPublishedPostIdBySlug(slug: string) {
     select: { id: true },
   });
 }
+
+/** 旧 slug → 新 slug（仅指向已发布文章；防自环） */
+export async function getPublishedRedirectTarget(oldSlug: string): Promise<string | null> {
+  const row = await db.postRedirect.findUnique({
+    where: { oldSlug },
+    select: { post: { select: { slug: true, status: true } } },
+  });
+  if (!row || row.post.status !== "PUBLISHED" || row.post.slug === oldSlug) return null;
+  return row.post.slug;
+}

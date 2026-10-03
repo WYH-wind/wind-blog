@@ -1,11 +1,15 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 
 import { PostReactions } from "@/components/post-reactions";
 import { formatDate } from "@/lib/date";
 import { renderMarkdown } from "@/lib/markdown";
-import { getPostNeighbors, getPublishedPostBySlug } from "@/server/queries/posts";
+import {
+  getPostNeighbors,
+  getPublishedPostBySlug,
+  getPublishedRedirectTarget,
+} from "@/server/queries/posts";
 
 type PostPageProps = { params: Promise<{ slug: string }> };
 
@@ -21,7 +25,12 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
   const post = await getPublishedPostBySlug(slug);
-  if (!post) notFound();
+  if (!post) {
+    // slug 曾被修改：旧链接 308 到新地址
+    const target = await getPublishedRedirectTarget(slug);
+    if (target) permanentRedirect(`/posts/${target}`);
+    notFound();
+  }
 
   const { html, toc, readingMinutes } = await renderMarkdown(post.content);
   const { prev, next } = await getPostNeighbors(post.publishedAt ?? post.createdAt);

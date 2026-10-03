@@ -8,3 +8,8 @@ export async function listVisibleFriendLinks() {
     orderBy: { sortOrder: "asc" },
   });
 }
+
+/** 后台用：包含隐藏项 */
+export async function listAllFriendLinks() {
+  return db.friendLink.findMany({ orderBy: { sortOrder: "asc" } });
+}
