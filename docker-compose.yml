@@ -12,7 +12,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - wind_pgdata:/var/lib/postgresql/data
+      # PG18+ 镜像要求挂载到 /var/lib/postgresql（数据在其 PG_VERSION 子目录下）
+      - wind_pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U wind -d wind"]
       interval: 5s

@@ -1,0 +1,118 @@
+// Wind 数据模型 — 规则见 docs/PLAN.md 第三节
+// PostView 是浏览量事实来源，Post.views 仅为缓存计数；
+// Reaction / PostView 以 visitorId（伪匿名 cookie）去重，不存 IP。
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Post {
+  id      Int        @id @default(autoincrement())
+  slug    String     @unique
+  title   String
+  summary String
+  content String
+  cover   String?
+  status  PostStatus @default(DRAFT)
+  pinned  Boolean    @default(false)
+  pinOrder Int       @default(0)
+  views   Int        @default(0)
+
+  publishedAt DateTime?  @db.Timestamptz(6)
+  createdAt   DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime   @default(now()) @updatedAt @db.Timestamptz(6)
+
+  tags       PostTag[]
+  reactions  Reaction[]
+  viewRecords PostView[]
+  redirects  PostRedirect[]
+
+  @@index([status, publishedAt])
+  @@index([status, pinned, pinOrder, publishedAt])
+}
+
+enum ReactionKind {
+  LIKE
+  FAVORITE
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  posts PostTag[]
+}
+
+model PostTag {
+  postId Int
+  tagId  Int
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@index([tagId, postId])
+}
+
+model Reaction {
+  id        Int          @id @default(autoincrement())
+  postId    Int
+  kind      ReactionKind
+  visitorId String
+  createdAt DateTime     @default(now()) @db.Timestamptz(6)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, kind, visitorId])
+}
+
+model PostView {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  visitorId String
+  day       DateTime @db.Date
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, visitorId, day])
+}
+
+model PostRedirect {
+  id      Int    @id @default(autoincrement())
+  oldSlug String @unique
+  postId  Int
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model FriendLink {
+  id          Int      @id @default(autoincrement())
+  name        String
+  url         String
+  avatar      String?
+  description String?
+  sortOrder   Int      @default(0)
+  visible     Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([visible, sortOrder])
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+}
