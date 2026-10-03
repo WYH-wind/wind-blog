@@ -1,0 +1,23 @@
+# 开发环境：本地 PostgreSQL（生产部署见 docs/PLAN.md 第五节，Phase 7）
+name: wind
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: wind-postgres
+    environment:
+      POSTGRES_USER: wind
+      POSTGRES_PASSWORD: wind
+      POSTGRES_DB: wind
+    ports:
+      - "5432:5432"
+    volumes:
+      - wind_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wind -d wind"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  wind_pgdata:
