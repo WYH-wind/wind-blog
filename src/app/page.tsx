@@ -1,42 +1,59 @@
 import Link from "next/link";
 
-import { formatDate } from "@/lib/date";
+import { WindLines } from "@/components/wind-lines";
+import { formatDateShort } from "@/lib/date";
 import { listPublishedPosts } from "@/server/queries/posts";
+import { getSettings } from "@/server/queries/settings";
 
 export default async function Home() {
-  const posts = await listPublishedPosts(20);
+  const [posts, settings] = await Promise.all([listPublishedPosts(20), getSettings()]);
 
   return (
-    <div className="space-y-10">
-      <section className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Wind</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">简洁、轻盈、流动的个人博客。</p>
+    <div className="space-y-12">
+      <section className="relative pb-4 pt-8">
+        <WindLines className="pointer-events-none absolute inset-x-0 -top-4 w-full opacity-80" />
+        <div className="relative">
+          <h1 className="font-heading text-5xl tracking-wide">{settings["site.name"]}</h1>
+          <p className="mt-3 text-muted">{settings["site.description"]}</p>
+        </div>
       </section>
 
-      <section className="space-y-6">
+      <ul className="divide-y divide-line/70">
         {posts.map((post) => (
-          <article key={post.id} className="space-y-1">
+          <li key={post.id} className="group py-5">
             <div className="flex items-baseline justify-between gap-4">
-              <h2 className="text-xl font-medium">
-                <Link href={`/posts/${post.slug}`} className="hover:underline">
-                  {post.title}
-                </Link>
+              <h2 className="font-heading text-lg transition-colors group-hover:text-accent">
+                <Link href={`/posts/${post.slug}`}>{post.title}</Link>
+                {post.pinned && (
+                  <span className="ml-2 rounded-full border border-accent/30 px-1.5 py-0.5 align-middle text-xs text-accent">
+                    置顶
+                  </span>
+                )}
               </h2>
               {post.publishedAt && (
-                <time dateTime={post.publishedAt.toISOString()} className="shrink-0 text-sm text-zinc-500 dark:text-zinc-400">
-                  {formatDate(post.publishedAt)}
+                <time
+                  dateTime={post.publishedAt.toISOString()}
+                  className="shrink-0 font-mono text-sm text-muted"
+                >
+                  {formatDateShort(post.publishedAt)}
                 </time>
               )}
             </div>
-            <p className="text-zinc-600 dark:text-zinc-400">{post.summary}</p>
-            <div className="flex gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-sm leading-6 text-muted">{post.summary}</p>
+            <div className="mt-2 flex flex-wrap gap-2 text-xs">
               {post.tags.map(({ tag }) => (
-                <span key={tag.id}>{tag.name}</span>
+                <Link
+                  key={tag.id}
+                  href={`/tags/${tag.slug}`}
+                  className="rounded-full bg-accent-soft px-2 py-0.5 text-accent transition-opacity hover:opacity-80"
+                >
+                  {tag.name}
+                </Link>
               ))}
             </div>
-          </article>
+          </li>
         ))}
-      </section>
+      </ul>
     </div>
   );
 }

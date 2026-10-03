@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ThemeProvider } from "next-themes";
 
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/500.css";
+import "lxgw-wenkai-screen-webfont/lxgwwenkaiscreen.css";
 import "./globals.css";
+
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { getSettings } from "@/server/queries/settings";
 
 export const metadata: Metadata = {
   title: {
@@ -12,20 +18,21 @@ export const metadata: Metadata = {
   description: "简洁、轻盈、流动的个人博客。",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSettings();
+
   return (
     <html lang="zh-CN" suppressHydrationWarning className="h-full antialiased">
       <body className="flex min-h-full flex-col">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <header className="mx-auto w-full max-w-2xl px-6 pt-10">
-            <Link href="/" className="text-lg font-semibold tracking-tight">
-              Wind
-            </Link>
-          </header>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SiteHeader siteName={settings["site.name"]} />
           <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">{children}</main>
-          <footer className="mx-auto w-full max-w-2xl px-6 pb-10 text-sm text-zinc-500 dark:text-zinc-400">
-            简洁、轻盈、流动
-          </footer>
+          <SiteFooter siteName={settings["site.name"]} footerText={settings["site.footer"]} />
         </ThemeProvider>
       </body>
     </html>

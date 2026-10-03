@@ -11,16 +11,16 @@
 
 ## 一、定版技术基线（精确锁定）
 
-| 层 | 选型 |
-| --- | --- |
-| 框架 | Next.js 16.3.8（含 2026-09-30 官方安全更新）+ React 19.3.0 + TypeScript strict |
-| 样式 | Tailwind CSS 4.3.x（CSS-first design tokens） |
-| 运行时 | Node.js 24 LTS + pnpm |
-| 数据库 | PostgreSQL 18（postgres:18-alpine）+ Prisma ORM 7.10.x（不追 8 RC） |
-| Markdown | unified（remark/rehype，默认禁 raw HTML）+ Shiki 4.5.x |
-| 运行时校验 | Zod：env / API body / Server Action 入参 / Setting 全部过校验 |
-| 认证 | @node-rs/argon2（Argon2id）+ jose 会话 JWT |
-| 测试 | Vitest + Playwright + ESLint 9 + Prettier |
+| 层         | 选型                                                                           |
+| ---------- | ------------------------------------------------------------------------------ |
+| 框架       | Next.js 16.3.8（含 2026-09-30 官方安全更新）+ React 19.3.0 + TypeScript strict |
+| 样式       | Tailwind CSS 4.3.x（CSS-first design tokens）                                  |
+| 运行时     | Node.js 24 LTS + pnpm                                                          |
+| 数据库     | PostgreSQL 18（postgres:18-alpine）+ Prisma ORM 7.10.x（不追 8 RC）            |
+| Markdown   | unified（remark/rehype，默认禁 raw HTML）+ Shiki 4.5.x                         |
+| 运行时校验 | Zod：env / API body / Server Action 入参 / Setting 全部过校验                  |
+| 认证       | @node-rs/argon2（Argon2id）+ jose 会话 JWT                                     |
+| 测试       | Vitest + Playwright + ESLint 9 + Prettier                                      |
 
 关键依赖在 package.json 写精确版本，pnpm-lock.yaml 入库；升级走显式提交。
 

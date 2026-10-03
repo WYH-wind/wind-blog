@@ -21,16 +21,16 @@ pnpm dev                      # http://localhost:3000
 
 ## 常用脚本
 
-| 命令 | 说明 |
-| --- | --- |
-| `pnpm dev` | 本地开发（Turbopack） |
-| `pnpm build` / `pnpm start` | 生产构建 / 启动 |
-| `pnpm lint` / `pnpm typecheck` | 代码检查 / 类型检查 |
-| `pnpm format` | Prettier 格式化 |
-| `pnpm db:up` | 启动本地 Postgres |
-| `pnpm prisma migrate dev` | 创建/应用迁移 |
-| `pnpm prisma db seed` | 示例数据 |
-| `pnpm admin:hash-password` | 生成 Argon2id 管理员密码哈希（写入 .env） |
+| 命令                           | 说明                                      |
+| ------------------------------ | ----------------------------------------- |
+| `pnpm dev`                     | 本地开发（Turbopack）                     |
+| `pnpm build` / `pnpm start`    | 生产构建 / 启动                           |
+| `pnpm lint` / `pnpm typecheck` | 代码检查 / 类型检查                       |
+| `pnpm format`                  | Prettier 格式化                           |
+| `pnpm db:up`                   | 启动本地 Postgres                         |
+| `pnpm prisma migrate dev`      | 创建/应用迁移                             |
+| `pnpm prisma db seed`          | 示例数据                                  |
+| `pnpm admin:hash-password`     | 生成 Argon2id 管理员密码哈希（写入 .env） |
 
 ## 文档
 

@@ -33,7 +33,10 @@ export default async function PostPage({ params }: PostPageProps) {
           )}
           <span>约 {readingMinutes} 分钟</span>
           {post.tags.map(({ tag }) => (
-            <span key={tag.id} className="rounded-full bg-black/[0.04] px-2 py-0.5 dark:bg-white/[0.06]">
+            <span
+              key={tag.id}
+              className="rounded-full bg-black/[0.04] px-2 py-0.5 dark:bg-white/[0.06]"
+            >
               {tag.name}
             </span>
           ))}
@@ -47,7 +50,10 @@ export default async function PostPage({ params }: PostPageProps) {
             <ul className="mt-2 space-y-1 border-l border-zinc-200 pl-4 dark:border-zinc-700">
               {toc.map((item) => (
                 <li key={item.id} style={{ paddingLeft: `${(item.depth - 2) * 12}px` }}>
-                  <a href={`#${item.id}`} className="text-zinc-600 hover:underline dark:text-zinc-400">
+                  <a
+                    href={`#${item.id}`}
+                    className="text-zinc-600 hover:underline dark:text-zinc-400"
+                  >
                     {item.text}
                   </a>
                 </li>
@@ -64,14 +70,20 @@ export default async function PostPage({ params }: PostPageProps) {
 
       <nav className="flex justify-between gap-4 border-t border-zinc-200 pt-6 text-sm dark:border-zinc-700">
         {prev ? (
-          <Link href={`/posts/${prev.slug}`} className="text-zinc-600 hover:underline dark:text-zinc-400">
+          <Link
+            href={`/posts/${prev.slug}`}
+            className="text-zinc-600 hover:underline dark:text-zinc-400"
+          >
             ← {prev.title}
           </Link>
         ) : (
           <span />
         )}
         {next && (
-          <Link href={`/posts/${next.slug}`} className="text-right text-zinc-600 hover:underline dark:text-zinc-400">
+          <Link
+            href={`/posts/${next.slug}`}
+            className="text-right text-zinc-600 hover:underline dark:text-zinc-400"
+          >
             {next.title} →
           </Link>
         )}
