@@ -16,13 +16,13 @@
 }
 
 .dark {
-  --background: #131518;
-  --surface: #1b1e22;
-  --foreground: #e5e7e3;
-  --muted: #9ba0a4;
-  --line: #2a2e33;
+  --background: #0c1320;
+  --surface: #131e30;
+  --foreground: #e3e8ef;
+  --muted: #8c99ab;
+  --line: #223450;
   --accent: #85cfd3;
-  --accent-soft: #1d3033;
+  --accent-soft: #12303f;
 }
 
 @theme inline {
