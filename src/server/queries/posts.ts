@@ -80,20 +80,36 @@ export type SearchHit = {
   title: string;
   summary: string;
   publishedAt: Date | null;
+  /** 最先命中的字段：标题/摘要命中优先于正文命中 */
+  matched: "title" | "summary" | "content";
 };
 
 /**
  * 全文搜索：pg_trgm + ILIKE（中文子串匹配；q 已在调用侧校验长度）。
  * LIKE 通配符（% _ \）必须转义，防止用户输入改变匹配语义。
+ * 范围含正文 content（个人博客量级，无索引顺序扫描可接受）；标题/摘要命中排在正文命中前。
  */
 export async function searchPublishedPosts(q: string): Promise<SearchHit[]> {
   const pattern = `%${escapeLikePattern(q)}%`;
   return db.$queryRaw<SearchHit[]>`
-    SELECT p.id, p.slug, p.title, p.summary, p."publishedAt"
+    SELECT p.id, p.slug, p.title, p.summary, p."publishedAt",
+      CASE
+        WHEN p.title ILIKE ${pattern} ESCAPE '\\' THEN 'title'
+        WHEN p.summary ILIKE ${pattern} ESCAPE '\\' THEN 'summary'
+        ELSE 'content'
+      END AS "matched"
     FROM "Post" p
     WHERE p.status = 'PUBLISHED'
-      AND (p.title ILIKE ${pattern} ESCAPE '\\' OR p.summary ILIKE ${pattern} ESCAPE '\\')
-    ORDER BY p."publishedAt" DESC NULLS LAST
+      AND (p.title ILIKE ${pattern} ESCAPE '\\'
+        OR p.summary ILIKE ${pattern} ESCAPE '\\'
+        OR p.content ILIKE ${pattern} ESCAPE '\\')
+    ORDER BY
+      CASE
+        WHEN p.title ILIKE ${pattern} ESCAPE '\\' THEN 0
+        WHEN p.summary ILIKE ${pattern} ESCAPE '\\' THEN 1
+        ELSE 2
+      END,
+      p."publishedAt" DESC NULLS LAST
     LIMIT 20
   `;
 }

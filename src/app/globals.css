@@ -131,6 +131,29 @@ body {
   }
 }
 
+/* ===================== 全局搜索弹窗 ===================== */
+/* 自顶部轻轻落下，与「轻盈」基调一致 */
+@keyframes wind-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wind-dialog {
+  animation: wind-drop 0.18s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wind-dialog {
+    animation: none;
+  }
+}
+
 /* ===================== Shiki 双主题 ===================== */
 .shiki span {
   color: var(--shiki-light);

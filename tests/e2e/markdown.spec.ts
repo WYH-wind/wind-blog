@@ -45,12 +45,33 @@ test.describe("前台渲染（Markdown 管线）", () => {
     await expect(like).toHaveAttribute("aria-pressed", "false");
   });
 
-  test("搜索页可用", async ({ page }) => {
+  test("全局搜索弹窗（任意页可开、即搜即得、回车直达）", async ({ page }) => {
+    // 旧 /search 地址 → 301 回首页
     await page.goto("/search");
-    await page.getByRole("searchbox", { name: "搜索关键词" }).fill("Next.js");
-    await page.getByRole("button", { name: "搜索", exact: true }).click();
-    await expect(page).toHaveURL(/q=/);
-    await expect(page.getByRole("link", { name: /用 Next\.js 16 搭建自己的博客/ })).toBeVisible();
+    await expect(page).toHaveURL(/\/$/);
+
+    // 任意页面（友链页）点头部图标弹出，输入框自动聚焦
+    await page.goto("/links");
+    await page.getByRole("button", { name: "搜索" }).click();
+    const input = page.getByRole("searchbox", { name: "搜索关键词" });
+    await expect(input).toBeFocused();
+
+    // 标题命中
+    await input.fill("Next.js");
+    await expect(page.getByRole("link", { name: /用 Next\.js 16 搭建自己的博客/ })).toBeVisible({
+      timeout: 5000,
+    });
+
+    // 仅正文命中的关键词（pg_dump 只出现在文章正文里）也能搜到
+    await input.fill("pg_dump");
+    await expect(page.getByRole("link", { name: /PostgreSQL 18 值得关注的几个点/ })).toBeVisible({
+      timeout: 5000,
+    });
+
+    // 回车打开当前项
+    await input.press("Enter");
+    await expect(page).toHaveURL(/\/posts\//);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
   test("404 页面", async ({ page }) => {
