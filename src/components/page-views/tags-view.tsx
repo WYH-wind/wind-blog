@@ -1,25 +1,24 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "标签" };
-export const revalidate = 300;
-
+import { ogMeta, seoAlternates } from "@/lib/seo";
+import { getDictionary, localePath, type Locale } from "@/messages";
 import { listTagsWithCount } from "@/server/queries/posts";
 
-export default async function TagsPage() {
+export async function TagsView({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale);
   const tags = await listTagsWithCount();
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8">
-      <h1 className="font-heading text-3xl tracking-wide">标签</h1>
+      <h1 className="font-heading text-3xl tracking-wide">{t.tags.title}</h1>
       {tags.length === 0 ? (
-        <p className="text-muted">还没有任何标签。</p>
+        <p className="text-muted">{t.tags.empty}</p>
       ) : (
         <div className="flex flex-wrap gap-3">
           {tags.map((tag) => (
             <Link
               key={tag.id}
-              href={`/tags/${tag.slug}`}
+              href={localePath(locale, `/tags/${tag.slug}`)}
               className="rounded-full border border-line bg-surface px-3.5 py-1.5 text-sm transition-colors hover:border-accent/40 hover:text-accent"
             >
               {tag.name}
@@ -30,4 +29,13 @@ export default async function TagsPage() {
       )}
     </div>
   );
+}
+
+export function tagsMetadata(locale: Locale) {
+  const t = getDictionary(locale);
+  return {
+    title: t.tags.title,
+    alternates: seoAlternates(locale, "/tags"),
+    openGraph: ogMeta(locale),
+  };
 }

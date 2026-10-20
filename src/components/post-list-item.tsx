@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { formatDateShort } from "@/lib/date";
+import { getDictionary, localePath, type Locale } from "@/messages";
 
 export type PostListItemData = {
   slug: string;
@@ -11,15 +12,16 @@ export type PostListItemData = {
   tags: Array<{ tag: { id: number; name: string; slug: string } }>;
 };
 
-export function PostListItem({ post }: { post: PostListItemData }) {
+export function PostListItem({ post, locale }: { post: PostListItemData; locale: Locale }) {
+  const t = getDictionary(locale);
   return (
     <li className="group py-5">
       <div className="flex items-baseline justify-between gap-4">
         <h2 className="font-heading text-lg transition-colors group-hover:text-accent">
-          <Link href={`/posts/${post.slug}`}>{post.title}</Link>
+          <Link href={localePath(locale, `/posts/${post.slug}`)}>{post.title}</Link>
           {post.pinned && (
             <span className="ml-2 rounded-full border border-accent/30 px-1.5 py-0.5 align-middle text-xs text-accent">
-              置顶
+              {t.post.pinned}
             </span>
           )}
         </h2>
@@ -37,7 +39,7 @@ export function PostListItem({ post }: { post: PostListItemData }) {
         {post.tags.map(({ tag }) => (
           <Link
             key={tag.id}
-            href={`/tags/${tag.slug}`}
+            href={localePath(locale, `/tags/${tag.slug}`)}
             className="rounded-full bg-accent-soft px-2 py-0.5 text-accent transition-opacity hover:opacity-80"
           >
             {tag.name}

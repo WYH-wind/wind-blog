@@ -1,18 +1,16 @@
-import type { Metadata } from "next";
-
+import { ogMeta, seoAlternates } from "@/lib/seo";
+import { getDictionary, type Locale } from "@/messages";
 import { listVisibleFriendLinks } from "@/server/queries/friend-links";
 
-export const metadata: Metadata = { title: "友链" };
-export const revalidate = 300;
-
-export default async function LinksPage() {
+export async function LinksView({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale);
   const links = await listVisibleFriendLinks();
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8">
-      <h1 className="font-heading text-3xl tracking-wide">友链</h1>
+      <h1 className="font-heading text-3xl tracking-wide">{t.links.title}</h1>
       {links.length === 0 ? (
-        <p className="text-muted">还没有友链，风还在路上。</p>
+        <p className="text-muted">{t.links.empty}</p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">
           {links.map((link) => (
@@ -36,4 +34,13 @@ export default async function LinksPage() {
       )}
     </div>
   );
+}
+
+export function linksMetadata(locale: Locale) {
+  const t = getDictionary(locale);
+  return {
+    title: t.links.title,
+    alternates: seoAlternates(locale, "/links"),
+    openGraph: ogMeta(locale),
+  };
 }

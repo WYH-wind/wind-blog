@@ -6,30 +6,22 @@ import { PostReactions } from "@/components/post-reactions";
 import { PostToc } from "@/components/post-toc";
 import { formatDate } from "@/lib/date";
 import { renderMarkdown } from "@/lib/markdown";
+import { ogMeta, seoAlternates } from "@/lib/seo";
+import { getDictionary, localePath, type Locale } from "@/messages";
 import {
   getPostNeighbors,
   getPublishedPostBySlug,
   getPublishedRedirectTarget,
 } from "@/server/queries/posts";
 
-type PostPageProps = { params: Promise<{ slug: string }> };
-
-export const revalidate = 300;
-
-export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const post = await getPublishedPostBySlug(slug);
-  if (!post) return { title: "文章不存在" };
-  return { title: post.title, description: post.summary };
-}
-
-export default async function PostPage({ params }: PostPageProps) {
-  const { slug } = await params;
+/** 文章页：zh/en 两棵路由树共用；slug 为内容主键，不随语言变化 */
+export async function PostView({ locale, slug }: { locale: Locale; slug: string }) {
+  const t = getDictionary(locale);
   const post = await getPublishedPostBySlug(slug);
   if (!post) {
     // slug 曾被修改：旧链接 308 到新地址
     const target = await getPublishedRedirectTarget(slug);
-    if (target) permanentRedirect(`/posts/${target}`);
+    if (target) permanentRedirect(localePath(locale, `/posts/${target}`));
     notFound();
   }
 
@@ -40,18 +32,18 @@ export default async function PostPage({ params }: PostPageProps) {
     <div className="mx-auto w-full max-w-4xl">
       <div className="lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
         {/* 左：目录栏（≥lg 显示；标题少时留空占位保持两栏） */}
-        <aside className="hidden lg:block">
-          {toc.length > 2 && <PostToc items={toc} />}
-        </aside>
+        <aside className="hidden lg:block">{toc.length > 2 && <PostToc items={toc} />}</aside>
 
         <article className="min-w-0 space-y-8">
           <header className="space-y-3">
             <h1 className="text-3xl font-semibold tracking-tight">{post.title}</h1>
             <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
               {post.publishedAt && (
-                <time dateTime={post.publishedAt.toISOString()}>{formatDate(post.publishedAt)}</time>
+                <time dateTime={post.publishedAt.toISOString()}>
+                  {formatDate(post.publishedAt, locale)}
+                </time>
               )}
-              <span>约 {readingMinutes} 分钟</span>
+              <span>{t.post.minutes(readingMinutes)}</span>
               {post.tags.map(({ tag }) => (
                 <span
                   key={tag.id}
@@ -65,9 +57,11 @@ export default async function PostPage({ params }: PostPageProps) {
 
           {/* 小屏折叠目录（左栏在 <lg 隐藏） */}
           {toc.length > 2 && (
-            <nav aria-label="目录" className="text-sm lg:hidden">
+            <nav aria-label={t.post.toc} className="text-sm lg:hidden">
               <details>
-                <summary className="cursor-pointer text-zinc-500 dark:text-zinc-400">目录</summary>
+                <summary className="cursor-pointer text-zinc-500 dark:text-zinc-400">
+                  {t.post.toc}
+                </summary>
                 <ul className="mt-2 space-y-1 border-l border-zinc-200 pl-4 dark:border-zinc-700">
                   {toc.map((item) => (
                     <li key={item.id} style={{ paddingLeft: `${(item.depth - 2) * 12}px` }}>
@@ -94,7 +88,7 @@ export default async function PostPage({ params }: PostPageProps) {
           <nav className="flex justify-between gap-4 border-t border-zinc-200 pt-6 text-sm dark:border-zinc-700">
             {prev ? (
               <Link
-                href={`/posts/${prev.slug}`}
+                href={localePath(locale, `/posts/${prev.slug}`)}
                 className="text-zinc-600 hover:underline dark:text-zinc-400"
               >
                 ← {prev.title}
@@ -104,7 +98,7 @@ export default async function PostPage({ params }: PostPageProps) {
             )}
             {next && (
               <Link
-                href={`/posts/${next.slug}`}
+                href={localePath(locale, `/posts/${next.slug}`)}
                 className="text-right text-zinc-600 hover:underline dark:text-zinc-400"
               >
                 {next.title} →
@@ -115,4 +109,16 @@ export default async function PostPage({ params }: PostPageProps) {
       </div>
     </div>
   );
+}
+
+export async function postMetadata(locale: Locale, slug: string): Promise<Metadata> {
+  const t = getDictionary(locale);
+  const post = await getPublishedPostBySlug(slug);
+  if (!post) return { title: t.post.notFoundTitle };
+  return {
+    title: post.title,
+    description: post.summary,
+    alternates: seoAlternates(locale, `/posts/${slug}`),
+    openGraph: ogMeta(locale),
+  };
 }

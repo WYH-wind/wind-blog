@@ -6,10 +6,10 @@ import "@fontsource/jetbrains-mono/500.css";
 import "lxgw-wenkai-screen-webfont/lxgwwenkaiscreen.css";
 import "./globals.css";
 
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
 import { env } from "@/env";
-import { getSettings } from "@/server/queries/settings";
+
+// 前台公共布局（header/main/footer）在 (site) 路由组：zh 与 /en 两棵树共用；
+// admin 在组外，不渲染站点头尾。每页的 hreflang/RSS 由各 view 的 metadata 提供。
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.SITE_URL),
@@ -18,9 +18,6 @@ export const metadata: Metadata = {
     template: "%s - Wind",
   },
   description: "简洁、轻盈、流动的个人博客。",
-  alternates: {
-    types: { "application/rss+xml": "/feed.xml" },
-  },
   openGraph: {
     type: "website",
     siteName: "Wind",
@@ -28,9 +25,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const settings = await getSettings();
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN" suppressHydrationWarning className="h-full antialiased">
       <body className="flex min-h-full flex-col">
@@ -40,10 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           enableSystem
           disableTransitionOnChange
         >
-          <SiteHeader siteName={settings["site.name"]} />
-          {/* 宽度由各页面自定：前台 max-w-2xl、文章页 max-w-4xl、后台 max-w-6xl */}
-          <main className="w-full flex-1 px-6 py-10">{children}</main>
-          <SiteFooter siteName={settings["site.name"]} footerText={settings["site.footer"]} />
+          {children}
         </ThemeProvider>
       </body>
     </html>

@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { formatDateShort } from "@/lib/date";
+import { useLocale } from "@/lib/use-locale";
+import { getDictionary } from "@/messages";
 
 type SearchHitDto = {
   slug: string;
@@ -14,8 +16,6 @@ type SearchHitDto = {
   publishedAt: string | null;
   matched: "title" | "summary" | "content";
 };
-
-const MATCHED_LABEL = { summary: "摘要", content: "正文" } as const;
 
 function escapeRegExp(text: string) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -43,6 +43,8 @@ function Highlight({ text, query }: { text: string; query: string }) {
 /** 全局搜索：点击头部图标后在页面顶端弹出，任意页面可用（原独立 /search 页已移除） */
 export function SearchDialog() {
   const router = useRouter();
+  const locale = useLocale();
+  const t = getDictionary(locale);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -129,8 +131,8 @@ export function SearchDialog() {
     <>
       <button
         type="button"
-        aria-label="搜索"
-        title="搜索"
+        aria-label={t.search.open}
+        title={t.search.open}
         onClick={() => setOpen(true)}
         className="shrink-0 rounded-full p-2 text-muted transition-colors hover:bg-accent-soft hover:text-accent"
       >
@@ -150,7 +152,12 @@ export function SearchDialog() {
 
       {open &&
         createPortal(
-          <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="站内搜索">
+          <div
+            className="fixed inset-0 z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.search.dialogLabel}
+          >
             <div className="absolute inset-0 bg-black/25 backdrop-blur-sm" onClick={close} />
             <div className="absolute inset-x-0 top-14 mx-auto w-[min(92vw,40rem)]">
               <div className="wind-dialog overflow-hidden rounded-2xl border border-line bg-surface shadow-xl">
@@ -174,14 +181,14 @@ export function SearchDialog() {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={onKeyDown}
                     maxLength={50}
-                    placeholder="搜索标题、摘要与正文…"
-                    aria-label="搜索关键词"
+                    placeholder={t.search.placeholder}
+                    aria-label={t.search.aria}
                     className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted/70"
                   />
                   <button
                     type="button"
                     onClick={close}
-                    aria-label="关闭搜索"
+                    aria-label={t.search.close}
                     className="shrink-0 rounded-md px-1.5 py-0.5 font-mono text-xs text-muted transition-colors hover:text-foreground"
                   >
                     Esc
@@ -190,14 +197,12 @@ export function SearchDialog() {
 
                 <div className="max-h-[min(60vh,26rem)] overflow-y-auto">
                   {query.trim() === "" ? (
-                    <p className="px-4 py-6 text-sm text-muted">
-                      输入关键词，搜索全部文章——含标题、摘要与正文。
-                    </p>
+                    <p className="px-4 py-6 text-sm text-muted">{t.search.emptyHint}</p>
                   ) : loading ? (
-                    <p className="px-4 py-6 text-sm text-muted">搜索中…</p>
+                    <p className="px-4 py-6 text-sm text-muted">{t.search.loading}</p>
                   ) : hits.length === 0 ? (
                     <p className="px-4 py-6 text-sm text-muted">
-                      没有找到「{query.trim()}」相关文章。
+                      {t.search.notFound(query.trim())}
                     </p>
                   ) : (
                     <ul>
@@ -217,7 +222,9 @@ export function SearchDialog() {
                               </span>
                               {hit.matched !== "title" && (
                                 <span className="shrink-0 rounded-full bg-black/[0.05] px-1.5 py-0.5 text-[10px] text-muted dark:bg-white/[0.08]">
-                                  {MATCHED_LABEL[hit.matched]}
+                                  {hit.matched === "summary"
+                                    ? t.search.matchedSummary
+                                    : t.search.matchedContent}
                                 </span>
                               )}
                               {hit.publishedAt && (

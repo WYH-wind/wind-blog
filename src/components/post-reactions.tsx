@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 
+import { useLocale } from "@/lib/use-locale";
+import { getDictionary } from "@/messages";
+
 type Kind = "LIKE" | "FAVORITE";
 type Counts = Record<Kind, number>;
 type Mine = Record<Kind, boolean>;
@@ -10,6 +13,7 @@ const EMPTY_COUNTS: Counts = { LIKE: 0, FAVORITE: 0 };
 const EMPTY_MINE: Mine = { LIKE: false, FAVORITE: false };
 
 export function PostReactions({ slug, initialViews }: { slug: string; initialViews: number }) {
+  const t = getDictionary(useLocale());
   const [counts, setCounts] = useState<Counts>(EMPTY_COUNTS);
   const [mine, setMine] = useState<Mine>(EMPTY_MINE);
   const [views, setViews] = useState<number>(initialViews);
@@ -102,7 +106,7 @@ export function PostReactions({ slug, initialViews }: { slug: string; initialVie
         >
           <path d="M12 20.5s-7.5-4.7-7.5-10A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.9c0 5.3-7.5 10-7.5 10Z" />
         </svg>
-        <span>赞</span>
+        <span>{t.post.like}</span>
         <span className="font-mono text-xs">{counts.LIKE}</span>
       </button>
 
@@ -125,11 +129,11 @@ export function PostReactions({ slug, initialViews }: { slug: string; initialVie
         >
           <path d="M6.5 3.5h11v17l-5.5-4-5.5 4v-17Z" />
         </svg>
-        <span>收藏</span>
+        <span>{t.post.favorite}</span>
         <span className="font-mono text-xs">{counts.FAVORITE}</span>
       </button>
 
-      <span className="ml-auto font-mono text-xs text-muted">{views} 次浏览</span>
+      <span className="ml-auto font-mono text-xs text-muted">{t.post.views(views)}</span>
     </div>
   );
 }

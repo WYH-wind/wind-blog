@@ -2,17 +2,21 @@
 
 import { useTheme } from "next-themes";
 
+import { useLocale } from "@/lib/use-locale";
+import { getDictionary } from "@/messages";
+
 /**
  * 深浅主题切换：图标用 CSS 随 .dark 切换，避免水合不匹配。
  */
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
+  const label = getDictionary(useLocale()).theme.toggle;
 
   return (
     <button
       type="button"
-      aria-label="切换深浅主题"
-      title="切换深浅主题"
+      aria-label={label}
+      title={label}
       className="rounded-full p-2 text-muted transition-colors hover:bg-accent-soft hover:text-accent"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >

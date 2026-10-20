@@ -2,10 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { useLocale } from "@/lib/use-locale";
+import { getDictionary } from "@/messages";
 import type { TocItem } from "@/lib/markdown";
 
 /** 文章页左侧目录：粘性定位，滚动时高亮当前小节（scroll-spy） */
 export function PostToc({ items }: { items: TocItem[] }) {
+  const t = getDictionary(useLocale());
   const [activeId, setActiveId] = useState<string>(items[0]?.id ?? "");
   // 点击目录项后短暂锁定 scroll-spy：平滑滚动途中位置尚未越线，避免高亮闪回上一节
   const lockUntilRef = useRef(0);
@@ -43,10 +46,10 @@ export function PostToc({ items }: { items: TocItem[] }) {
 
   return (
     <nav
-      aria-label="目录"
+      aria-label={t.post.toc}
       className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pb-4 text-sm"
     >
-      <p className="mb-2 text-xs tracking-[0.2em] text-muted">目录</p>
+      <p className="mb-2 text-xs tracking-[0.2em] text-muted">{t.post.toc}</p>
       <ul className="space-y-1 border-l border-line">
         {items.map((item) => {
           const active = item.id === activeId;

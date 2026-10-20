@@ -1,11 +1,11 @@
 import { WindLines } from "@/components/wind-lines";
 import { PostListItem } from "@/components/post-list-item";
+import { ogMeta, seoAlternates } from "@/lib/seo";
+import type { Locale } from "@/messages";
 import { listPublishedPosts } from "@/server/queries/posts";
 import { getSettings } from "@/server/queries/settings";
 
-export const revalidate = 300;
-
-export default async function Home() {
+export async function HomeView({ locale }: { locale: Locale }) {
   const [posts, settings] = await Promise.all([listPublishedPosts(20), getSettings()]);
 
   return (
@@ -20,9 +20,16 @@ export default async function Home() {
 
       <ul className="divide-y divide-line/70">
         {posts.map((post) => (
-          <PostListItem key={post.id} post={post} />
+          <PostListItem key={post.id} post={post} locale={locale} />
         ))}
       </ul>
     </div>
   );
+}
+
+export function homeMetadata(locale: Locale) {
+  return {
+    alternates: seoAlternates(locale, "/"),
+    openGraph: ogMeta(locale),
+  };
 }

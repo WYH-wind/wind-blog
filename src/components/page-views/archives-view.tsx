@@ -1,13 +1,12 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { formatDateShort, SITE_TIMEZONE } from "@/lib/date";
+import { ogMeta, seoAlternates } from "@/lib/seo";
+import { getDictionary, localePath, type Locale } from "@/messages";
 import { listArchivedPosts } from "@/server/queries/posts";
 
-export const metadata: Metadata = { title: "归档" };
-export const revalidate = 300;
-
-export default async function ArchivesPage() {
+export async function ArchivesView({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale);
   const posts = await listArchivedPosts();
 
   // 按站点时区的年份分组
@@ -29,9 +28,10 @@ export default async function ArchivesPage() {
   return (
     <div className="mx-auto w-full max-w-2xl space-y-10">
       <h1 className="font-heading text-3xl tracking-wide">
-        归档 <span className="ml-1 font-mono text-base text-muted">{posts.length}</span>
+        {t.archives.title}{" "}
+        <span className="ml-1 font-mono text-base text-muted">{posts.length}</span>
       </h1>
-      {years.length === 0 && <p className="text-muted">还没有发布任何文章。</p>}
+      {years.length === 0 && <p className="text-muted">{t.archives.empty}</p>}
       {years.map((year) => (
         <section key={year} className="space-y-3">
           <h2 className="font-heading text-xl text-accent">{year}</h2>
@@ -46,7 +46,10 @@ export default async function ArchivesPage() {
                     {formatDateShort(post.publishedAt)}
                   </time>
                 )}
-                <Link href={`/posts/${post.slug}`} className="transition-colors hover:text-accent">
+                <Link
+                  href={localePath(locale, `/posts/${post.slug}`)}
+                  className="transition-colors hover:text-accent"
+                >
                   {post.title}
                 </Link>
               </li>
@@ -56,4 +59,13 @@ export default async function ArchivesPage() {
       ))}
     </div>
   );
+}
+
+export function archivesMetadata(locale: Locale) {
+  const t = getDictionary(locale);
+  return {
+    title: t.archives.title,
+    alternates: seoAlternates(locale, "/archives"),
+    openGraph: ogMeta(locale),
+  };
 }
