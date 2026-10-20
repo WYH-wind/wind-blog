@@ -37,11 +37,18 @@ test.describe("发布链路（登录 → 新建 → 草稿 → 发布跳转 → 
     await tagInput.press("Enter");
     await expect(page.getByRole("button", { name: "移除标签 测试" })).toBeVisible();
 
-    // 先存草稿：跳到编辑页
+    // 先存草稿：成功后回查看页（非编辑模式）并提示「已保存」
     await page.getByRole("button", { name: "保存草稿" }).click();
-    await expect(page).toHaveURL(/\/admin\/posts\/\d+\/edit$/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/admin\/posts\/\d+(\?toast=\w+)?$/, { timeout: 10_000 });
+    await expect(page.getByText("已保存", { exact: true })).toBeVisible();
+    await expect(page.getByText("草稿", { exact: true })).toBeVisible();
+    // 查看页正文只读（无编辑输入框），标题等元信息可见
+    await expect(page.getByRole("textbox", { name: "正文" })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: TITLE })).toBeVisible();
 
-    // 发布：二次确认后跳到前台文章页
+    // 从查看页进入编辑，再发布：二次确认后跳到前台文章页
+    await page.getByRole("link", { name: "编辑", exact: true }).click();
+    await expect(page).toHaveURL(/\/admin\/posts\/\d+\/edit$/, { timeout: 10_000 });
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "发布" }).click();
     await expect(page).toHaveURL(new RegExp(`/posts/${SLUG_PREFIX}$`), { timeout: 10_000 });
@@ -55,6 +62,19 @@ test.describe("发布链路（登录 → 新建 → 草稿 → 发布跳转 → 
     await expect(page.getByRole("heading", { name: "E2E 标题" })).toBeVisible();
     await expect(page.locator("pre.shiki")).toHaveCount(1);
     await expect(page.getByRole("button", { name: /赞/ })).toBeVisible();
+
+    // 已发布文章「保存修改」：保持发布态回查看页，toast「已保存」
+    await page.goto("/admin");
+    await page
+      .locator("li", { has: page.getByRole("link", { name: TITLE }) })
+      .first()
+      .getByRole("link", { name: "编辑" })
+      .click();
+    await expect(page).toHaveURL(/\/admin\/posts\/\d+\/edit$/);
+    await page.getByRole("button", { name: "保存修改" }).click();
+    await expect(page).toHaveURL(/\/admin\/posts\/\d+(\?toast=\w+)?$/, { timeout: 10_000 });
+    await expect(page.getByText("已保存", { exact: true })).toBeVisible();
+    await expect(page.getByText("已发布", { exact: true })).toBeVisible();
 
     // 清理：删除（confirm 必须在点击前注册，Playwright 默认 dismiss）
     await page.goto("/admin");

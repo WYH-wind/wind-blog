@@ -2,21 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 
-import { settingsSchema, SETTING_KEYS } from "@/lib/settings-schema";
+import { settingsSchema } from "@/lib/settings-schema";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { db } from "@/server/db";
+import type { ActionResult } from "@/server/actions/friend-links";
 
-export async function saveSettingsFormAction(formData: FormData): Promise<void> {
+export async function saveSettingsAction(input: unknown): Promise<ActionResult> {
   await requireAdmin();
 
-  const raw: Record<string, string> = {};
-  for (const key of SETTING_KEYS) {
-    const value = formData.get(key);
-    raw[key] = typeof value === "string" ? value : "";
+  const parsed = settingsSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "输入不合法" };
   }
-
-  const parsed = settingsSchema.safeParse(raw);
-  if (!parsed.success) return; // 表单侧已约束；非法输入静默忽略
 
   for (const [key, value] of Object.entries(parsed.data)) {
     await db.setting.upsert({
@@ -27,4 +24,5 @@ export async function saveSettingsFormAction(formData: FormData): Promise<void> 
   }
 
   revalidatePath("/", "layout");
+  return { ok: true };
 }

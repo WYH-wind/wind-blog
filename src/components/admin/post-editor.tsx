@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { slugFromTitle } from "@/lib/slug";
 import { savePostAction } from "@/server/actions/posts";
 import { previewMarkdownAction } from "@/server/actions/preview";
+import { AdminToast, useAdminToast } from "@/components/admin/toast";
 
 export type PostEditorInitial = {
   id: number;
@@ -91,7 +92,7 @@ export function PostEditor({
   const [colorOpen, setColorOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const { toast, show } = useAdminToast();
 
   // 预览 debounce 300ms，走与前台一致的渲染管线（Server Action）
   useEffect(() => {
@@ -162,39 +163,40 @@ export function PostEditor({
 
   async function insertImage(file: File) {
     setUploading(true);
-    setMessage(null);
     try {
       const body = new FormData();
       body.append("file", file);
       const res = await fetch("/api/admin/upload", { method: "POST", body });
       const data = await res.json();
       if (!res.ok) {
-        setMessage({ ok: false, text: data.error ?? "上传失败" });
+        show(false, data.error ?? "上传失败");
         return;
       }
       const ta = contentRef.current;
       const pos = ta?.selectionStart ?? content.length;
       const snippet = `\n![](${data.url})\n`;
       setContent(content.slice(0, pos) + snippet + content.slice(pos));
-      setMessage({ ok: true, text: "图片已插入" });
+      show(true, "图片已插入");
     } catch {
-      setMessage({ ok: false, text: "上传失败" });
+      show(false, "上传失败");
     } finally {
       setUploading(false);
     }
   }
 
   /**
-   * 保存：草稿直接保存；发布需二次确认，成功后跳到前台文章页。
-   * 已发布文章「保存修改」保持发布态，「转为草稿」需确认（前台立即不可见）。
+   * 保存：草稿/已发布文章的保存直接提交；仅「首次发布」和「转为草稿」需要二次确认。
+   * 成功一律回查看页（非编辑模式）；失败留在编辑模式并 toast 提示。
    */
   async function save(target: "DRAFT" | "PUBLISHED") {
-    if (target === "PUBLISHED" && !window.confirm("确认发布？发布后前台立即可见。")) return;
+    if (saving) return; // 防重复提交
+    if (target === "PUBLISHED" && !isPublished && !window.confirm("确认发布？发布后前台立即可见。")) {
+      return;
+    }
     if (target === "DRAFT" && isPublished && !window.confirm("转为草稿后前台将不可见，确认？")) {
       return;
     }
     setSaving(true);
-    setMessage(null);
     try {
       const result = await savePostAction(initial?.id ?? null, {
         title,
@@ -208,21 +210,20 @@ export function PostEditor({
         tags,
       });
       if (!result.ok) {
-        setMessage({ ok: false, text: result.error });
+        show(false, result.error);
         return;
       }
-      if (target === "PUBLISHED") {
-        if (!initial) router.replace(`/admin/posts/${result.id}/edit`);
+      const viewPath = `/admin/posts/${result.id}`;
+      if (target === "PUBLISHED" && !isPublished) {
+        // 首次发布 → 跳前台文章页（即成功反馈）
+        if (!initial) router.replace(viewPath); // 新建：历史里留下查看页而非空编辑器
         router.push(`/posts/${result.slug}`);
         return;
       }
-      if (!initial) {
-        router.replace(`/admin/posts/${result.id}/edit`);
-      }
-      router.refresh();
-      setMessage({ ok: true, text: "已保存为草稿" });
+      // 保存草稿 / 已发布的保存修改 / 转为草稿：回查看页，由 ?toast= 展示成功提示
+      router.replace(`${viewPath}?toast=${target === "PUBLISHED" ? "saved" : isPublished ? "drafted" : "saved"}`);
     } catch {
-      setMessage({ ok: false, text: "保存失败，请重试" });
+      show(false, "保存失败，请重试");
     } finally {
       setSaving(false);
     }
@@ -260,15 +261,12 @@ export function PostEditor({
 
   return (
     <div className="flex flex-col gap-5">
+      <AdminToast toast={toast} />
+
       {/* 顶栏：标题 + 操作按钮 */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-heading text-2xl tracking-wide">{initial ? "编辑文章" : "新建文章"}</h1>
         <div className="flex flex-wrap items-center gap-2">
-          {message && (
-            <span className={`text-sm ${message.ok ? "text-accent" : "text-red-500"}`}>
-              {message.text}
-            </span>
-          )}
           <button
             type="button"
             onClick={() => setShowPreview((v) => !v)}
@@ -278,7 +276,7 @@ export function PostEditor({
           </button>
           <button
             type="button"
-            onClick={() => save("DRAFT")}
+            onClick={() => save(isPublished ? "PUBLISHED" : "DRAFT")}
             disabled={saving}
             className="rounded-full border border-line px-4 py-1.5 text-sm text-muted transition-colors hover:border-accent/50 hover:text-accent disabled:opacity-60"
           >

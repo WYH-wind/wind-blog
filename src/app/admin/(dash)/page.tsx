@@ -27,7 +27,7 @@ export default async function AdminDashboard() {
             <li key={post.id} className="flex items-center justify-between gap-4 py-3">
               <div className="min-w-0">
                 <Link
-                  href={`/admin/posts/${post.id}/edit`}
+                  href={`/admin/posts/${post.id}`}
                   className="font-heading transition-colors hover:text-accent"
                 >
                   {post.title}
@@ -54,6 +54,12 @@ export default async function AdminDashboard() {
                 >
                   {post.status === "PUBLISHED" ? "已发布" : "草稿"}
                 </span>
+                <Link
+                  href={`/admin/posts/${post.id}/edit`}
+                  className="rounded-full border border-line px-2.5 py-1 text-muted transition-colors hover:text-accent"
+                >
+                  编辑
+                </Link>
                 <DeletePostButton id={post.id} />
               </div>
             </li>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -147,105 +148,106 @@ export function SearchDialog() {
         </svg>
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="站内搜索">
-          <div
-            className="absolute inset-0 bg-black/25 motion-reduce:transition-none"
-            onClick={close}
-          />
-          <div className="absolute inset-x-0 top-14 mx-auto w-[min(92vw,40rem)]">
-            <div className="wind-dialog overflow-hidden rounded-2xl border border-line bg-surface shadow-xl">
-              <div className="flex items-center gap-2 border-b border-line px-4">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  className="h-4 w-4 shrink-0 text-muted"
-                  aria-hidden="true"
-                >
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="m20 20-3.8-3.8" />
-                </svg>
-                <input
-                  ref={inputRef}
-                  type="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onKeyDown={onKeyDown}
-                  maxLength={50}
-                  placeholder="搜索标题、摘要与正文…"
-                  aria-label="搜索关键词"
-                  className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted/70"
-                />
-                <button
-                  type="button"
-                  onClick={close}
-                  aria-label="关闭搜索"
-                  className="shrink-0 rounded-md px-1.5 py-0.5 font-mono text-xs text-muted transition-colors hover:text-foreground"
-                >
-                  Esc
-                </button>
-              </div>
+      {open &&
+        createPortal(
+          <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="站内搜索">
+            <div className="absolute inset-0 bg-black/25 backdrop-blur-sm" onClick={close} />
+            <div className="absolute inset-x-0 top-14 mx-auto w-[min(92vw,40rem)]">
+              <div className="wind-dialog overflow-hidden rounded-2xl border border-line bg-surface shadow-xl">
+                <div className="flex items-center gap-2 border-b border-line px-4">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    className="h-4 w-4 shrink-0 text-muted"
+                    aria-hidden="true"
+                  >
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-3.8-3.8" />
+                  </svg>
+                  <input
+                    ref={inputRef}
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={onKeyDown}
+                    maxLength={50}
+                    placeholder="搜索标题、摘要与正文…"
+                    aria-label="搜索关键词"
+                    className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted/70"
+                  />
+                  <button
+                    type="button"
+                    onClick={close}
+                    aria-label="关闭搜索"
+                    className="shrink-0 rounded-md px-1.5 py-0.5 font-mono text-xs text-muted transition-colors hover:text-foreground"
+                  >
+                    Esc
+                  </button>
+                </div>
 
-              <div className="max-h-[min(60vh,26rem)] overflow-y-auto">
-                {query.trim() === "" ? (
-                  <p className="px-4 py-6 text-sm text-muted">
-                    输入关键词，搜索全部文章——含标题、摘要与正文。
-                  </p>
-                ) : loading ? (
-                  <p className="px-4 py-6 text-sm text-muted">搜索中…</p>
-                ) : hits.length === 0 ? (
-                  <p className="px-4 py-6 text-sm text-muted">没有找到「{query.trim()}」相关文章。</p>
-                ) : (
-                  <ul>
-                    {hits.map((hit, i) => (
-                      <li key={hit.slug} className="border-b border-line/60 last:border-b-0">
-                        <Link
-                          href={`/posts/${hit.slug}`}
-                          onClick={close}
-                          onMouseEnter={() => setActiveIndex(i)}
-                          className={`flex flex-col gap-0.5 px-4 py-2.5 transition-colors ${
-                            i === activeIndex ? "bg-accent-soft/60" : ""
-                          }`}
-                        >
-                          <span className="flex items-center gap-2">
-                            <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                              <Highlight text={hit.title} query={query.trim()} />
+                <div className="max-h-[min(60vh,26rem)] overflow-y-auto">
+                  {query.trim() === "" ? (
+                    <p className="px-4 py-6 text-sm text-muted">
+                      输入关键词，搜索全部文章——含标题、摘要与正文。
+                    </p>
+                  ) : loading ? (
+                    <p className="px-4 py-6 text-sm text-muted">搜索中…</p>
+                  ) : hits.length === 0 ? (
+                    <p className="px-4 py-6 text-sm text-muted">
+                      没有找到「{query.trim()}」相关文章。
+                    </p>
+                  ) : (
+                    <ul>
+                      {hits.map((hit, i) => (
+                        <li key={hit.slug} className="border-b border-line/60 last:border-b-0">
+                          <Link
+                            href={`/posts/${hit.slug}`}
+                            onClick={close}
+                            onMouseEnter={() => setActiveIndex(i)}
+                            className={`flex flex-col gap-0.5 px-4 py-2.5 transition-colors ${
+                              i === activeIndex ? "bg-accent-soft/60" : ""
+                            }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                                <Highlight text={hit.title} query={query.trim()} />
+                              </span>
+                              {hit.matched !== "title" && (
+                                <span className="shrink-0 rounded-full bg-black/[0.05] px-1.5 py-0.5 text-[10px] text-muted dark:bg-white/[0.08]">
+                                  {MATCHED_LABEL[hit.matched]}
+                                </span>
+                              )}
+                              {hit.publishedAt && (
+                                <span className="shrink-0 font-mono text-[11px] text-muted">
+                                  {formatDateShort(new Date(hit.publishedAt))}
+                                </span>
+                              )}
                             </span>
-                            {hit.matched !== "title" && (
-                              <span className="shrink-0 rounded-full bg-black/[0.05] px-1.5 py-0.5 text-[10px] text-muted dark:bg-white/[0.08]">
-                                {MATCHED_LABEL[hit.matched]}
+                            {hit.summary && (
+                              <span className="truncate text-xs text-muted">
+                                <Highlight text={hit.summary} query={query.trim()} />
                               </span>
                             )}
-                            {hit.publishedAt && (
-                              <span className="shrink-0 font-mono text-[11px] text-muted">
-                                {formatDateShort(new Date(hit.publishedAt))}
-                              </span>
-                            )}
-                          </span>
-                          {hit.summary && (
-                            <span className="truncate text-xs text-muted">
-                              <Highlight text={hit.summary} query={query.trim()} />
-                            </span>
-                          )}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
 
-              <div className="flex items-center gap-3 border-t border-line px-4 py-2 font-mono text-[10px] text-muted/80">
-                <span>↑↓ 选择</span>
-                <span>↵ 打开</span>
-                <span>Esc 关闭</span>
+                <div className="flex items-center gap-3 border-t border-line px-4 py-2 font-mono text-[10px] text-muted/80">
+                  <span>↑↓ 选择</span>
+                  <span>↵ 打开</span>
+                  <span>Esc 关闭</span>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }
